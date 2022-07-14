@@ -6,4 +6,8 @@ export class GetAllQueryDto {
   @IsInt()
   @ApiPropertyOptional()
   readonly take?: number;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  readonly search?: string;
 }

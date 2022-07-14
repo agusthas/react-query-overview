@@ -30,9 +30,18 @@ export class ProductsController {
   @Get()
   @ApiOkResponse({ type: [Product] })
   async getAll(@Query() query: GetAllQueryDto): Promise<Product[]> {
-    const { take } = query;
+    const { take, search } = query;
     const products = await this.productsService.getAll({
       take,
+      where: search
+        ? {
+            OR: [
+              { name: { contains: search } },
+              { description: { contains: search } },
+              { sku: { contains: search } },
+            ],
+          }
+        : {},
       orderBy: { updatedAt: 'desc' },
     });
     return products.map((product) => new Product(product));
