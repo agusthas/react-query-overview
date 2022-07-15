@@ -21,3 +21,35 @@ model Product {
   sku         String  @unique
   published   Boolean @default(false)
 }
+
+model Pokemon {
+  id    Int           @id @default(autoincrement())
+  name  PokemonName?
+  types PokemonType[]
+  base  PokemonBase?
+}
+
+model PokemonName {
+  englishName  String  @id @unique
+  japaneseName String?
+  chineseName  String?
+  frenchName   String?
+  pokemon      Pokemon @relation(fields: [pokemonId], references: [id])
+  pokemonId    Int     @unique
+}
+
+model PokemonBase {
+  pokemonId Int     @id @unique
+  hp        Int     @default(0)
+  attack    Int     @default(0)
+  defense   Int     @default(0)
+  spAttack  Int     @default(0)
+  spDefense Int     @default(0)
+  speed     Int     @default(0)
+  pokemon   Pokemon @relation(fields: [pokemonId], references: [id])
+}
+
+model PokemonType {
+  type     String    @id @unique
+  pokemons Pokemon[]
+}

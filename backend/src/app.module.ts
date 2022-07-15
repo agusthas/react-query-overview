@@ -9,12 +9,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { ProductsModule } from './products/products.module';
+import { PokemonsModule } from './pokemons/pokemons.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     ProductsModule,
+    PokemonsModule,
   ],
   controllers: [AppController],
   providers: [
