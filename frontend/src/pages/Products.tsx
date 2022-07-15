@@ -5,26 +5,34 @@ import {
   Highlight,
   List,
   Loader,
+  Modal,
+  NumberInput,
   Paper,
+  SimpleGrid,
   Stack,
+  Switch,
   Text,
+  Textarea,
   TextInput,
   Title,
 } from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
+import { useBooleanToggle, useDebouncedValue } from '@mantine/hooks';
 import { useState } from 'react';
-import { useProducts } from '../modules/products/hooks';
+import { ProductForm } from '../components/ProductForm';
+import { ProductView } from '../components/ProductView';
+import { useProduct, useProducts } from '../modules/products/hooks';
+import { SetState } from '../types';
 
-function ProductPage() {
+const Products: React.FC<{ setProductId: SetState<string> }> = ({
+  setProductId,
+}) => {
+  const [createModal, setCreateModal] = useState(false);
   const [search, setSearch] = useState('');
   const [debounced, cancel] = useDebouncedValue(search, 500);
   const products = useProducts(debounced);
+
   return (
     <div>
-      <Title order={2} mb="md">
-        Product Page
-      </Title>
-
       <Group align="flex-end">
         <TextInput
           placeholder="Search"
@@ -36,10 +44,35 @@ function ProductPage() {
         <Button onClick={cancel}>Cancel</Button>
       </Group>
 
+      <Button mt="lg" variant="outline" onClick={() => setCreateModal(true)}>
+        Add Product
+      </Button>
+
+      <Modal
+        size="lg"
+        opened={createModal}
+        centered
+        title="Add Product"
+        onClose={() => setCreateModal(false)}
+      >
+        <ProductForm />
+      </Modal>
+
       {products.data ? (
         <Stack mt="lg">
           {products.data.map((product) => (
-            <Paper withBorder p="sm">
+            <Paper
+              key={product.id}
+              withBorder
+              p="sm"
+              onClick={() => setProductId(product.id)}
+              sx={(theme) => ({
+                cursor: 'pointer',
+                ':hover': {
+                  backgroundColor: theme.colors.dark[5],
+                },
+              })}
+            >
               <Stack>
                 <div>
                   <Text weight={500} size="lg" color="blue">
@@ -79,6 +112,49 @@ function ProductPage() {
         </Alert>
       ) : (
         <Loader />
+      )}
+    </div>
+  );
+};
+
+const Product: React.FC<{
+  productId: string;
+  setProductId: SetState<string>;
+}> = ({ productId, setProductId }) => {
+  const { data, isFetching, error } = useProduct(productId);
+
+  return (
+    <div>
+      <Button onClick={() => setProductId('')} variant="subtle" mb="md">
+        Back
+      </Button>
+
+      {data ? (
+        <ProductView product={data} handleGoBack={() => setProductId('')} />
+      ) : error ? (
+        <Alert title="Bummer!" color="red">
+          {error.message}
+        </Alert>
+      ) : (
+        <Loader />
+      )}
+    </div>
+  );
+};
+
+function ProductPage() {
+  const [productId, setProductId] = useState('');
+
+  return (
+    <div>
+      <Title order={2} mb="md">
+        Product Page
+      </Title>
+
+      {productId ? (
+        <Product productId={productId} setProductId={setProductId} />
+      ) : (
+        <Products setProductId={setProductId} />
       )}
     </div>
   );
