@@ -1,9 +1,14 @@
-import { useQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 import fetcher from '../../config/fetcher';
 import { Info, Pokemon } from './types';
 
+type PaginatedPokemonResponse = {
+  pokemons: Pokemon[];
+  info: Info;
+};
+
 const fetchPokemons = async (page = 1, limit = 20) => {
-  const { data } = await fetcher.get('/pokemons', {
+  const { data } = await fetcher.get<PaginatedPokemonResponse>('/pokemons', {
     params: {
       page,
       limit,
@@ -20,14 +25,23 @@ export const usePaginatedPokemons = ({
   page: number;
   limit: number;
 }) => {
-  return useQuery<
+  return useQuery<PaginatedPokemonResponse, Error>(
+    ['paginatedPokemons', page, limit],
+    () => fetchPokemons(page, limit),
     {
-      pokemons: Pokemon[];
-      info: Info;
-    },
-    Error
-  >(['pokemons', page, limit], () => fetchPokemons(page, limit), {
-    keepPreviousData: true,
-    staleTime: 5000, // in ms
-  });
+      keepPreviousData: true,
+      staleTime: 5000, // in ms
+    }
+  );
+};
+
+export const useInfinitePokemons = () => {
+  return useInfiniteQuery<PaginatedPokemonResponse, Error>(
+    'infiniteProjects',
+    ({ pageParam }) => fetchPokemons(pageParam),
+    {
+      getNextPageParam: (lastPage) => lastPage.info.nextPage,
+      getPreviousPageParam: (firstPage) => firstPage.info.prevPage,
+    }
+  );
 };

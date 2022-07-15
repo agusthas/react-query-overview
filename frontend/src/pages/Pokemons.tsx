@@ -10,9 +10,12 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { PokemonBadge } from '../components/PokemonBadge';
-import { usePaginatedPokemons } from '../modules/pokemons/hooks';
+import {
+  useInfinitePokemons,
+  usePaginatedPokemons,
+} from '../modules/pokemons/hooks';
 
 const PokemonPagination = () => {
   const [page, setPage] = useState(1);
@@ -115,14 +118,102 @@ const PokemonPagination = () => {
   );
 };
 
-const PokemonsPage = () => {
+const InfinitePokemonPagination = () => {
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfinitePokemons();
+
   return (
     <div>
       <Title order={2} mb="md">
-        Pokemons Page
+        Infinite Pokemon Pagination
       </Title>
 
-      <PokemonPagination />
+      <Text mb="md">
+        In this example, each page of data remains visible as the next page is
+        fetched with help of <Code>keepPreviousData</Code>. Each page is cached
+        as normal query too, so when navigating through pages, if no refetch, it
+        will show instantaneously.
+      </Text>
+
+      <div style={{ paddingBottom: 30 }}>
+        {status === 'loading' && (
+          <Group position="center">
+            <Loader />
+          </Group>
+        )}
+        {status === 'error' && (
+          <Alert title="Bummer!" color="red">
+            {error.message}
+          </Alert>
+        )}
+        {status === 'success' && data && (
+          <>
+            {data.pages.map((group, i) => (
+              <Fragment key={i}>
+                {group.pokemons.map((pokemon) => (
+                  <Text key={pokemon.id}>{pokemon.name?.englishName}</Text>
+                ))}
+              </Fragment>
+            ))}
+
+            <Group mt="md">
+              <Button
+                onClick={() => fetchNextPage()}
+                disabled={!hasNextPage || isFetchingNextPage}
+              >
+                {isFetchingNextPage
+                  ? 'Loading More...'
+                  : hasNextPage
+                  ? 'Load More'
+                  : 'Nothing more to load'}
+              </Button>
+
+              {isFetching && !isFetchingNextPage && (
+                <Group>
+                  <Text>Fetching...</Text>
+                  <Loader />
+                </Group>
+              )}
+            </Group>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PokemonsPage = () => {
+  const [activeTab, setActiveTab] = useState('');
+  const handleBack = () => setActiveTab('');
+
+  return (
+    <div>
+      <Group mb="md">
+        <Title order={2}>Pokemons Page</Title>
+        <Button onClick={() => setActiveTab('pagination')} color="violet">
+          Paginatied Queries
+        </Button>
+        <Button onClick={() => setActiveTab('infinite')} color="yellow">
+          Infinite Queries
+        </Button>
+        <Button
+          sx={{ display: 'flex', marginLeft: 'auto' }}
+          onClick={() => setActiveTab('')}
+          color="red"
+        >
+          Clear
+        </Button>
+      </Group>
+
+      {activeTab === 'pagination' && <PokemonPagination />}
+      {activeTab === 'infinite' && <InfinitePokemonPagination />}
     </div>
   );
 };

@@ -1,5 +1,7 @@
 export interface Info {
   page: number;
+  prevPage: number | null;
+  nextPage: number | null;
   limit: number;
   lastPage: number;
   total: number;

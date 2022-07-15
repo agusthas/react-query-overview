@@ -30,6 +30,8 @@ export class PokemonsService {
       pokemons,
       info: {
         page,
+        prevPage: page > 1 ? page - 1 : null,
+        nextPage: page < Math.ceil(count / take) ? page + 1 : null,
         limit: take,
         lastPage: Math.ceil(count / take),
         total: count,
