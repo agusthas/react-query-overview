@@ -16,6 +16,7 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 import { BrowserRouter, Link, Outlet, Route, Routes } from 'react-router-dom';
 import queryClient from './config/queryClient';
 import NotFoundPage from './pages/404';
+import AutoRefetchPage from './pages/AutoRefetch';
 import Home from './pages/Home';
 import ProductPage from './pages/Products';
 
@@ -45,6 +46,10 @@ function AppLayout() {
         <Divider sx={{ height: 24 }} orientation="vertical" />
         <Anchor component={Link} to="/products">
           Products
+        </Anchor>
+        <Divider sx={{ height: 24 }} orientation="vertical" />
+        <Anchor component={Link} to="/auto-refetch">
+          Auto Refetching Example
         </Anchor>
       </Group>
 
@@ -83,6 +88,7 @@ function App() {
               <Route path="/" element={<AppLayout />}>
                 <Route index element={<Home />} />
                 <Route path="products" element={<ProductPage />} />
+                <Route path="auto-refetch" element={<AutoRefetchPage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
