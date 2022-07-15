@@ -1,8 +1,10 @@
 import {
   Alert,
+  Badge,
   Button,
   Group,
   Highlight,
+  Indicator,
   List,
   Loader,
   Modal,
@@ -18,6 +20,7 @@ import {
 } from '@mantine/core';
 import { useBooleanToggle, useDebouncedValue } from '@mantine/hooks';
 import { useState } from 'react';
+import { useQueryClient } from 'react-query';
 import { ProductForm } from '../components/ProductForm';
 import { ProductView } from '../components/ProductView';
 import { useProduct, useProducts } from '../modules/products/hooks';
@@ -26,6 +29,7 @@ import { SetState } from '../types';
 const Products: React.FC<{ setProductId: SetState<string> }> = ({
   setProductId,
 }) => {
+  const qc = useQueryClient();
   const [createModal, setCreateModal] = useState(false);
   const [search, setSearch] = useState('');
   const [debounced, cancel] = useDebouncedValue(search, 500);
@@ -44,9 +48,16 @@ const Products: React.FC<{ setProductId: SetState<string> }> = ({
         <Button onClick={cancel}>Cancel</Button>
       </Group>
 
-      <Button mt="lg" variant="outline" onClick={() => setCreateModal(true)}>
-        Add Product
-      </Button>
+      <Group>
+        <Button
+          mt="lg"
+          mb="md"
+          variant="outline"
+          onClick={() => setCreateModal(true)}
+        >
+          Add Product
+        </Button>
+      </Group>
 
       <Modal
         size="lg"
@@ -59,7 +70,7 @@ const Products: React.FC<{ setProductId: SetState<string> }> = ({
       </Modal>
 
       {products.data ? (
-        <Stack mt="lg">
+        <Stack>
           {products.data.map((product) => (
             <Paper
               key={product.id}
@@ -69,15 +80,27 @@ const Products: React.FC<{ setProductId: SetState<string> }> = ({
               sx={(theme) => ({
                 cursor: 'pointer',
                 ':hover': {
-                  backgroundColor: theme.colors.dark[5],
+                  backgroundColor:
+                    theme.colorScheme === 'dark'
+                      ? theme.colors.dark[5]
+                      : theme.colors.gray[1],
                 },
               })}
             >
               <Stack>
                 <div>
-                  <Text weight={500} size="lg" color="blue">
-                    <Highlight highlight={debounced}>{product.name}</Highlight>
-                  </Text>
+                  <Group position="apart">
+                    <Text weight={500} size="lg" color="blue">
+                      <Highlight highlight={debounced}>
+                        {product.name}
+                      </Highlight>
+                    </Text>
+                    {qc.getQueryData(['product', product.id]) ? (
+                      <Badge variant="dot" color="teal">
+                        Seen
+                      </Badge>
+                    ) : null}
+                  </Group>
                   <Text color="dimmed" size="sm">
                     <Highlight highlight={debounced}>{product.sku}</Highlight>
                   </Text>
@@ -136,7 +159,9 @@ const Product: React.FC<{
           {error.message}
         </Alert>
       ) : (
-        <Loader />
+        <Group position="center">
+          <Loader variant="bars" />
+        </Group>
       )}
     </div>
   );
