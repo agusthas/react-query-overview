@@ -18,6 +18,7 @@ import queryClient from './config/queryClient';
 import NotFoundPage from './pages/404';
 import AutoRefetchPage from './pages/AutoRefetch';
 import Home from './pages/Home';
+import PokemonsPage from './pages/Pokemons';
 import ProductPage from './pages/Products';
 
 function AppLayout() {
@@ -46,6 +47,10 @@ function AppLayout() {
         <Divider sx={{ height: 24 }} orientation="vertical" />
         <Anchor component={Link} to="/products">
           Products
+        </Anchor>
+        <Divider sx={{ height: 24 }} orientation="vertical" />
+        <Anchor component={Link} to="/pokemons">
+          Pokemons
         </Anchor>
         <Divider sx={{ height: 24 }} orientation="vertical" />
         <Anchor component={Link} to="/auto-refetch">
@@ -89,6 +94,7 @@ function App() {
                 <Route index element={<Home />} />
                 <Route path="products" element={<ProductPage />} />
                 <Route path="auto-refetch" element={<AutoRefetchPage />} />
+                <Route path="pokemons" element={<PokemonsPage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
