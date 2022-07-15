@@ -1,25 +1,13 @@
 import { AxiosResponse } from 'axios';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import fetcher from '../../config/fetcher';
-
-export interface Product {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-
-  name: string;
-  description?: string;
-  price: number;
-  sku: string;
-  published: boolean;
-}
-
-export type ProductCreateValue = Pick<
-  Product,
-  'name' | 'description' | 'price' | 'sku' | 'published'
->;
-
-export type ProductUpdateValue = Partial<ProductCreateValue>;
+import {
+  createProduct,
+  deleteProduct,
+  fetchProduct,
+  fetchProducts,
+  updateProduct,
+} from './api';
+import { Product, ProductCreateValue, ProductUpdateValue } from './types';
 
 // Query Key Factories
 // const productKeys = {
@@ -32,33 +20,21 @@ export type ProductUpdateValue = Partial<ProductCreateValue>;
 export const useProducts = (search: string) => {
   return useQuery<Product[], Error>(
     ['products', search],
-    async () => {
-      const { data } = await fetcher.get('/products', { params: { search } });
-      return data;
-    },
-    {
-      keepPreviousData: true,
-    }
+    () => fetchProducts({ search }),
+    { keepPreviousData: true }
   );
 };
 
 export const useProduct = (id: string) => {
-  return useQuery<Product, Error>(
-    ['product', id],
-    async () => {
-      const { data } = await fetcher.get(`/products/${id}`);
-      return data;
-    },
-    {
-      enabled: !!id,
-    }
-  );
+  return useQuery<Product, Error>(['product', id], () => fetchProduct(id), {
+    enabled: !!id,
+  });
 };
 
 export const useCreateProduct = () => {
   const qc = useQueryClient();
   return useMutation<AxiosResponse<Product>, Error, ProductCreateValue>(
-    (values) => fetcher.post('/products', values),
+    (values) => createProduct(values),
     {
       onSuccess: () => {
         qc.invalidateQueries(['products']);
@@ -72,8 +48,8 @@ export const useUpdateProduct = () => {
   return useMutation<
     AxiosResponse<Product>,
     Error,
-    Pick<Product, 'id'> & { values: ProductUpdateValue }
-  >(({ id, values }) => fetcher.put(`/products/${id}`, values), {
+    { id: Product['id']; values: ProductUpdateValue }
+  >(({ id, values }) => updateProduct(id, values), {
     onSuccess: (data, { id, values }) => {
       qc.setQueryData(['product', id], { ...data, ...values });
     },
@@ -83,7 +59,7 @@ export const useUpdateProduct = () => {
 export const useDeleteProduct = () => {
   const qc = useQueryClient();
   return useMutation<AxiosResponse<Product>, Error, Product['id']>(
-    (id) => fetcher.delete(`/products/${id}`),
+    (id) => deleteProduct(id),
     {
       onSuccess: () => {
         qc.invalidateQueries(['products']);

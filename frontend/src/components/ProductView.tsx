@@ -14,12 +14,8 @@ import { useForm } from '@mantine/form';
 import { useBooleanToggle } from '@mantine/hooks';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import {
-  Product,
-  ProductUpdateValue,
-  useDeleteProduct,
-  useUpdateProduct,
-} from '../modules/products/hooks';
+import { useDeleteProduct, useUpdateProduct } from '../modules/products/hooks';
+import { Product, ProductUpdateValue } from '../modules/products/types';
 import { getSKUfromName } from '../utils';
 
 export const ProductView: React.FC<{

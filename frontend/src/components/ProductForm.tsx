@@ -11,10 +11,8 @@ import {
   Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import {
-  ProductCreateValue,
-  useCreateProduct,
-} from '../modules/products/hooks';
+import { useCreateProduct } from '../modules/products/hooks';
+import { ProductCreateValue } from '../modules/products/types';
 import { getSKUfromName } from '../utils';
 
 export const ProductForm: React.FC<{}> = ({}) => {
