@@ -5,5 +5,5 @@ Todo:
 - [x] useQuery
 - [x] useMutation
 - [ ] Dependent Queries
-- [ ] Infinite queries
-- [ ] Paginated Queries
+- [x] Infinite queries
+- [x] Paginated Queries
