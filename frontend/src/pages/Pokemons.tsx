@@ -6,13 +6,16 @@ import {
   Loader,
   Pagination,
   Select,
+  SimpleGrid,
   Table,
   Tabs,
   Text,
   Title,
 } from '@mantine/core';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { PokemonBadge } from '../components/PokemonBadge';
+import PokemonCard from '../components/PokemonCard';
 import {
   useInfinitePokemons,
   usePaginatedPokemons,
@@ -120,6 +123,7 @@ const PokemonPagination = () => {
 };
 
 const InfinitePokemonPagination = () => {
+  const { ref, inView } = useInView();
   const {
     data,
     error,
@@ -130,6 +134,13 @@ const InfinitePokemonPagination = () => {
     status,
   } = useInfinitePokemons();
 
+  // fetch nextPage when button is in view
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage();
+    }
+  }, [inView]);
+
   return (
     <div>
       <Title order={2} mb="md">
@@ -137,10 +148,11 @@ const InfinitePokemonPagination = () => {
       </Title>
 
       <Text mb="md">
-        In this example, each page of data remains visible as the next page is
-        fetched with help of <Code>keepPreviousData</Code>. Each page is cached
-        as normal query too, so when navigating through pages, if no refetch, it
-        will show instantaneously.
+        In this example, the pagination is handled by React-Query, so the
+        pagination is not visible in the UI. This creates an infinite scroll of
+        the data. By default the query fetch only 20 pokemons per page, and it
+        is possible to change this value in the <Code>useInfinitePokemons</Code>{' '}
+        hook.
       </Text>
 
       <div style={{ paddingBottom: 30 }}>
@@ -155,17 +167,20 @@ const InfinitePokemonPagination = () => {
           </Alert>
         )}
         {status === 'success' && data && (
-          <>
-            {data.pages.map((group, i) => (
-              <Fragment key={i}>
-                {group.pokemons.map((pokemon) => (
-                  <Text key={pokemon.id}>{pokemon.name?.englishName}</Text>
-                ))}
-              </Fragment>
-            ))}
+          <div>
+            <SimpleGrid cols={3}>
+              {data.pages.map((group, i) => (
+                <Fragment key={i}>
+                  {group.pokemons.map((pokemon) => (
+                    <PokemonCard key={pokemon.id} pokemon={pokemon} />
+                  ))}
+                </Fragment>
+              ))}
+            </SimpleGrid>
 
             <Group mt="md">
               <Button
+                ref={ref}
                 onClick={() => fetchNextPage()}
                 disabled={!hasNextPage || isFetchingNextPage}
               >
@@ -183,7 +198,7 @@ const InfinitePokemonPagination = () => {
                 </Group>
               )}
             </Group>
-          </>
+          </div>
         )}
       </div>
     </div>

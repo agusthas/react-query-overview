@@ -28,7 +28,6 @@ export const PokemonBadge = ({ type }: { type: string }) => {
         return 'blue';
       case 'GHOST':
       case 'POISON':
-      case 'GROUND':
         return 'violet';
       case 'ICE':
         return 'cyan';
