@@ -1,17 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../database/services/prisma.service';
 
 @Injectable()
 export class PokemonsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getPaginated(pageParams: { page: number; limit: number }) {
-    const { page, limit: take } = pageParams;
+  async getPaginated(params: {
+    page: number;
+    limit: number;
+    where?: Prisma.PokemonWhereInput;
+  }) {
+    const { page, limit: take, where: filters } = params;
     // IMPORTANT FORMULA
     const skip = (page - 1) * take;
 
     const [count, pokemons] = await this.prismaService.$transaction([
-      this.prismaService.pokemon.count(),
+      this.prismaService.pokemon.count({
+        where: filters ?? {},
+      }),
       this.prismaService.pokemon.findMany({
         skip,
         take,
@@ -23,6 +30,7 @@ export class PokemonsService {
           base: true,
           types: true,
         },
+        where: filters ?? {},
       }),
     ]);
 
