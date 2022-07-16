@@ -6,10 +6,12 @@ export class PokemonFilterDto {
   @IsOptional()
   @IsArray()
   @IsNotEmpty({ each: true })
-  @Transform(({ value }) => {
-    console.log({ value, type: typeof value });
-    return value.split(',');
+  @Transform(({ value }) => value.split(','))
+  @ApiPropertyOptional({
+    description: 'Comma separated types of pokemon',
+    example: 'Grass,Poison',
+    type: [String],
+    format: 'form',
   })
-  @ApiPropertyOptional({ type: [String] })
   types?: string[];
 }

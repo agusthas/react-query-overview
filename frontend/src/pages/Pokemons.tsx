@@ -2,32 +2,42 @@ import {
   Alert,
   Button,
   Code,
+  Divider,
   Group,
   Loader,
-  Pagination,
-  Select,
+  MultiSelect,
+  NativeSelect,
   SimpleGrid,
   Table,
   Tabs,
   Text,
   Title,
 } from '@mantine/core';
-import { Fragment, useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { useSetState } from '@mantine/hooks';
+import { Fragment, useState } from 'react';
+import { LoadMoreButton } from '../components/LoadMoreButton';
 import { PokemonBadge } from '../components/PokemonBadge';
-import PokemonCard from '../components/PokemonCard';
+import { PokemonCard } from '../components/PokemonCard';
 import {
   useInfinitePokemons,
   usePaginatedPokemons,
 } from '../modules/pokemons/hooks';
+import { PokemonParams, POKEMON_TYPES_DATA } from '../modules/pokemons/types';
+
+const MUTABLE_TYPES = POKEMON_TYPES_DATA.map<string>((t) => t);
 
 const PokemonPagination = () => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [params, setParams] = useSetState<PokemonParams>({
+    page: 1, // FIXME: not used afaik
+    limit: 20,
+    types: [],
+  });
+
   const { status, data, error, isFetching, isPreviousData } =
     usePaginatedPokemons({
-      page,
-      limit: pageSize,
+      page: params.page,
+      limit: params.limit,
+      types: params.types,
     });
 
   return (
@@ -55,38 +65,53 @@ const PokemonPagination = () => {
         )}
         {status === 'success' && data && (
           <>
-            <Group my="md" position="apart">
-              <Pagination
-                page={page}
-                onChange={setPage}
-                total={data.info.lastPage}
-              />
-
-              <Select
+            <Group my="md" spacing={30}>
+              <NativeSelect
+                label="Limit"
+                description="Limit per page"
                 data={['20', '40', '50', '100']}
-                value={pageSize.toString()}
-                onChange={(v) => setPageSize(v ? Number(v) : pageSize)}
+                value={params.limit.toString()}
+                onChange={(e) => setParams({ limit: parseInt(e.target.value) })}
               />
 
-              <Group>
-                <Button
-                  size="xs"
-                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                  disabled={page === 1}
-                >
-                  Prev
-                </Button>
-                <Text>{page}</Text>
-                <Button
-                  size="xs"
-                  onClick={() =>
-                    setPage((p) => (data.info.lastPage !== page ? p + 1 : p))
-                  }
-                  disabled={isPreviousData || data.info.lastPage === page}
-                >
-                  Next
-                </Button>
-              </Group>
+              <MultiSelect
+                label="Types"
+                description="Pokemon Types"
+                data={MUTABLE_TYPES}
+                value={params.types}
+                onChange={(types) => setParams({ types })}
+                maxSelectedValues={2}
+                searchable
+                clearable
+              />
+            </Group>
+
+            <Divider my="sm" />
+            <Group mb="md" spacing="xs">
+              <Button
+                size="xs"
+                onClick={() =>
+                  setParams({ page: Math.max(params.page - 1, 1) })
+                }
+                disabled={params.page === 1}
+              >
+                Prev
+              </Button>
+              <Text>{params.page}</Text>
+              <Button
+                size="xs"
+                onClick={() =>
+                  setParams({
+                    page:
+                      data.info.lastPage !== params.page
+                        ? params.page + 1
+                        : params.page,
+                  })
+                }
+                disabled={isPreviousData || data.info.lastPage === params.page}
+              >
+                Next
+              </Button>
             </Group>
 
             <Table>
@@ -99,7 +124,7 @@ const PokemonPagination = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.pokemons.map((pokemon) => (
+                {data.results.map((pokemon) => (
                   <tr key={pokemon.id}>
                     <td>{pokemon.id}</td>
                     <td>{pokemon.name?.englishName}</td>
@@ -123,7 +148,12 @@ const PokemonPagination = () => {
 };
 
 const InfinitePokemonPagination = () => {
-  const { ref, inView } = useInView();
+  const [params, setParams] = useSetState<PokemonParams>({
+    page: 1, // FIXME: not used afaik
+    limit: 10,
+    types: [],
+  });
+
   const {
     data,
     error,
@@ -132,14 +162,10 @@ const InfinitePokemonPagination = () => {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useInfinitePokemons();
-
-  // fetch nextPage when button is in view
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage();
-    }
-  }, [inView]);
+  } = useInfinitePokemons({
+    limit: params.limit,
+    types: params.types,
+  });
 
   return (
     <div>
@@ -167,11 +193,34 @@ const InfinitePokemonPagination = () => {
           </Alert>
         )}
         {status === 'success' && data && (
-          <div>
-            <SimpleGrid cols={3}>
+          <>
+            <Group my="md" spacing={30}>
+              <NativeSelect
+                label="Limit"
+                description="Limit per page"
+                data={['10', '20', '40', '50', '100']}
+                value={params.limit.toString()}
+                onChange={(e) => setParams({ limit: Number(e.target.value) })}
+              />
+
+              <MultiSelect
+                label="Types"
+                description="Pokemon Types"
+                data={MUTABLE_TYPES}
+                value={params.types}
+                onChange={(types) => setParams({ types })}
+                maxSelectedValues={2}
+                searchable
+                clearable
+              />
+            </Group>
+
+            <Divider my="sm" />
+
+            <SimpleGrid cols={3} mt="md">
               {data.pages.map((group, i) => (
                 <Fragment key={i}>
-                  {group.pokemons.map((pokemon) => (
+                  {group.results.map((pokemon) => (
                     <PokemonCard key={pokemon.id} pokemon={pokemon} />
                   ))}
                 </Fragment>
@@ -179,17 +228,11 @@ const InfinitePokemonPagination = () => {
             </SimpleGrid>
 
             <Group mt="md">
-              <Button
-                ref={ref}
-                onClick={() => fetchNextPage()}
-                disabled={!hasNextPage || isFetchingNextPage}
-              >
-                {isFetchingNextPage
-                  ? 'Loading More...'
-                  : hasNextPage
-                  ? 'Load More'
-                  : 'Nothing more to load'}
-              </Button>
+              <LoadMoreButton
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                fetchNextPage={fetchNextPage}
+              />
 
               {isFetching && !isFetchingNextPage && (
                 <Group>
@@ -198,7 +241,7 @@ const InfinitePokemonPagination = () => {
                 </Group>
               )}
             </Group>
-          </div>
+          </>
         )}
       </div>
     </div>

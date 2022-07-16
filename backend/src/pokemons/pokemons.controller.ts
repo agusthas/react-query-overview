@@ -29,7 +29,7 @@ export class PokemonsController {
     });
 
     return {
-      pokemons: pokemons.map((pokemon) => new Pokemon(pokemon)),
+      results: pokemons.map((pokemon) => new Pokemon(pokemon)),
       info,
     };
   }

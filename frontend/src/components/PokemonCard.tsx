@@ -2,7 +2,7 @@ import { Card, Group, Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import { Pokemon } from '../modules/pokemons/types';
 import { PokemonBadge } from './PokemonBadge';
 
-const PokemonCard: React.FC<{ pokemon: Pokemon }> = ({ pokemon }) => {
+export const PokemonCard: React.FC<{ pokemon: Pokemon }> = ({ pokemon }) => {
   return (
     <Card withBorder p="lg" radius="md">
       <Group position="apart" align="start">
@@ -11,7 +11,9 @@ const PokemonCard: React.FC<{ pokemon: Pokemon }> = ({ pokemon }) => {
           <Text color="dimmed">{pokemon.name?.japaneseName}</Text>
         </div>
         <Group spacing="xs" mt="xs">
-          <PokemonBadge type={pokemon.types[0]} />
+          {pokemon.types.map((type) => (
+            <PokemonBadge key={type} type={type} />
+          ))}
         </Group>
       </Group>
 
@@ -30,5 +32,3 @@ const PokemonCard: React.FC<{ pokemon: Pokemon }> = ({ pokemon }) => {
     </Card>
   );
 };
-
-export default PokemonCard;

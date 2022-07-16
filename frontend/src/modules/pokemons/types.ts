@@ -29,3 +29,32 @@ export interface PokemonName {
   chineseName: string | null;
   frenchName: string | null;
 }
+
+export const POKEMON_TYPES_DATA = [
+  'Grass',
+  'Poison',
+  'Fire',
+  'Flying',
+  'Water',
+  'Bug',
+  'Normal',
+  'Electric',
+  'Ground',
+  'Fairy',
+  'Fighting',
+  'Psychic',
+  'Rock',
+  'Steel',
+  'Ice',
+  'Ghost',
+  'Dragon',
+  'Dark',
+] as const;
+
+export type PokemonType = typeof POKEMON_TYPES_DATA[number];
+
+export interface PokemonParams {
+  page: number;
+  limit: number;
+  types: string[];
+}
