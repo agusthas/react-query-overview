@@ -8,15 +8,13 @@ import {
   MultiSelect,
   NativeSelect,
   SimpleGrid,
-  Table,
   Tabs,
   Text,
   Title,
 } from '@mantine/core';
 import { useSetState } from '@mantine/hooks';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { LoadMoreButton } from '../components/LoadMoreButton';
-import { PokemonBadge } from '../components/PokemonBadge';
 import { PokemonCard } from '../components/PokemonCard';
 import {
   useInfinitePokemons,
@@ -25,10 +23,11 @@ import {
 import { PokemonParams, POKEMON_TYPES_DATA } from '../modules/pokemons/types';
 
 const MUTABLE_TYPES = POKEMON_TYPES_DATA.map<string>((t) => t);
+const POKEMON_GRID_COLUMN = 4;
 
 const PokemonPagination = () => {
   const [params, setParams] = useSetState<PokemonParams>({
-    page: 1, // FIXME: not used afaik
+    page: 1,
     limit: 20,
     types: [],
   });
@@ -114,32 +113,11 @@ const PokemonPagination = () => {
               </Button>
             </Group>
 
-            <Table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Nihongo</th>
-                  <th>Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.results.map((pokemon) => (
-                  <tr key={pokemon.id}>
-                    <td>{pokemon.id}</td>
-                    <td>{pokemon.name?.englishName}</td>
-                    <td>{pokemon.name?.japaneseName}</td>
-                    <td>
-                      <Group>
-                        {pokemon.types.map((type) => (
-                          <PokemonBadge type={type} key={type} />
-                        ))}
-                      </Group>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <SimpleGrid cols={POKEMON_GRID_COLUMN} mt="md">
+              {data.results.map((pokemon) => (
+                <PokemonCard key={pokemon.id} pokemon={pokemon} />
+              ))}
+            </SimpleGrid>
           </>
         )}
       </div>
@@ -149,7 +127,7 @@ const PokemonPagination = () => {
 
 const InfinitePokemonPagination = () => {
   const [params, setParams] = useSetState<PokemonParams>({
-    page: 1, // FIXME: not used afaik
+    page: 1, // FIXME: not used in this component afaik
     limit: 10,
     types: [],
   });
@@ -217,7 +195,7 @@ const InfinitePokemonPagination = () => {
 
             <Divider my="sm" />
 
-            <SimpleGrid cols={3} mt="md">
+            <SimpleGrid cols={POKEMON_GRID_COLUMN} mt="md">
               {data.pages.map((group, i) => (
                 <Fragment key={i}>
                   {group.results.map((pokemon) => (
