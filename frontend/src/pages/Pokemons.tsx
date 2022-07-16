@@ -7,6 +7,7 @@ import {
   Pagination,
   Select,
   Table,
+  Tabs,
   Text,
   Title,
 } from '@mantine/core';
@@ -190,30 +191,17 @@ const InfinitePokemonPagination = () => {
 };
 
 const PokemonsPage = () => {
-  const [activeTab, setActiveTab] = useState('');
-  const handleBack = () => setActiveTab('');
-
   return (
     <div>
-      <Group mb="md">
-        <Title order={2}>Pokemons Page</Title>
-        <Button onClick={() => setActiveTab('pagination')} color="violet">
-          Paginatied Queries
-        </Button>
-        <Button onClick={() => setActiveTab('infinite')} color="yellow">
-          Infinite Queries
-        </Button>
-        <Button
-          sx={{ display: 'flex', marginLeft: 'auto' }}
-          onClick={() => setActiveTab('')}
-          color="red"
-        >
-          Clear
-        </Button>
-      </Group>
-
-      {activeTab === 'pagination' && <PokemonPagination />}
-      {activeTab === 'infinite' && <InfinitePokemonPagination />}
+      <Title order={2}>Pokemons Page</Title>
+      <Tabs mt="md">
+        <Tabs.Tab label="Paginated Queries" color="violet">
+          <PokemonPagination />
+        </Tabs.Tab>
+        <Tabs.Tab label="Infinite Queries" color="yellow">
+          <InfinitePokemonPagination />
+        </Tabs.Tab>
+      </Tabs>
     </div>
   );
 };
